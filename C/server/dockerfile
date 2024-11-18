@@ -2,5 +2,4 @@ FROM gcc:4.9
 COPY . /Server
 WORKDIR /Server/
 RUN gcc -o udp_sink2 udp_sink2.c
-EXPOSE 8888
 ENTRYPOINT ["./udp_sink2"]
