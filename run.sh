@@ -7,8 +7,10 @@ echo ==============================
 (
   cd ./C/server
   docker build -t z34_c_server .
-  docker run --network z34_network --name z34_c_server --network-alias z34_c_server z34_c_server:latest 8000
+  docker run --network z34_network --name z34_c_server --network-alias z34_c_server --hostname z34_c_server z34_c_server:latest 8000
 ) &
+
+sleep 2
 
 (
     cd ./Python/client
@@ -36,6 +38,8 @@ echo ==============================
     docker build -t z34_p_server .
     docker run --network z34_network --name z34_p_server --hostname z34_p_server z34_p_server   
 ) &
+
+sleep 2
 
 (
   cd ./C/client
