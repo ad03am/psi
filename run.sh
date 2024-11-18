@@ -1,5 +1,9 @@
 #!/bin/bash
 
+echo ============
+echo C-C combo
+echo
+
 (
   cd ./C/server
   docker build -t z34_c_server .
@@ -12,14 +16,20 @@
   docker run --network z34_network --name z34_c_client z34_c_client:latest z34_c_server 8000
 ) &
 
-sleep 5
+sleep 7
 
 docker logs -f z34_c_server &
 docker logs -f z34_c_client &
 
-docker rm -f z34_c_server z34_c_client z34_p_server z34_p_client 2>/dev/null || true
+sleep 3
 
-wait 1
+docker rm -f z34_c_server z34_c_client 2>/dev/null || true
+
+sleep 3
+
+echo ===========
+echo Python - Python combo
+echo
 
 (
     cd ./Python/server
@@ -33,9 +43,11 @@ wait 1
     docker run --network z34_network --name z34_p_client z34_p_client z34_p_server 8000
 ) &
 
-sleep 5
+sleep 7
 
-docker logs -f z34_c_server &
-docker logs -f z34_c_client &
+docker logs -f z34_p_server &
+docker logs -f z34_p_client &
 
-docker rm -f z34_c_server z34_c_client z34_p_server z34_p_client 2>/dev/null || true
+sleep 3
+
+docker rm -f z34_p_server z34_p_client 2>/dev/null || true
