@@ -22,7 +22,7 @@ def main(arguments: list[str]) -> None:
         sys.exit(1)
 
     print(f"Connecting to {HOST}:{port}")
-    size = 65500
+    size = 6
 
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
         while True:
