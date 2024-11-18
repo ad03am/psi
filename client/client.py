@@ -16,6 +16,9 @@ def main(arguments: list[str]) -> None:
     if len(arguments) < 2:
         host = HOST
         port = 8000
+    elif len(arguments) == 1:
+        host = arguments[0]
+        port = 8000
     elif len(arguments) == 2:
         host = arguments[0]
         port = int(arguments[1])
@@ -34,7 +37,6 @@ def main(arguments: list[str]) -> None:
             s.sendto(message, (host, port))
             data = s.recv(size)
             print('Received', repr(data))
-            print(f"Message Length: {len(data)}")
 
             if data != b"OK\x00":
                 print("Error in datagram")
