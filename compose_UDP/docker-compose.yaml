@@ -1,0 +1,14 @@
+version: "3.0"
+services:
+  sink:
+    container_name: udp_sink2
+    build: ./sink
+    tty: true
+    cap_add:
+    - NET_ADMIN
+  source:
+    container_name: udp_source2
+    build: ./source
+    tty: true
+    cap_add:
+    - NET_ADMIN
