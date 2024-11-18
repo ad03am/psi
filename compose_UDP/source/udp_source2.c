@@ -23,7 +23,7 @@ void prepare_dgram(char *databuf, int length) {
     int i = 2;
 
     int reported_length = ((databuf[0] << 8) | databuf[1]) & 0xFFFF;
-    for (i; i <= length+2; i++) {
+    for (i; i < length; i++) {
         databuf[i] = 'A' + ((i - 2) % 26);
     }
 }
@@ -69,7 +69,7 @@ int main(int argc, char *argv[])
         prepare_dgram(databuf, dgram_size);
 
         printf("Sending %d bytes datagram...\n", dgram_size);
-        if ((send( sock, databuf, dgram_size+2, 0 )) <0 ) {
+        if ((send( sock, databuf, dgram_size, 0 )) <0 ) {
             perror("send error!\n");
             break;
 	    }

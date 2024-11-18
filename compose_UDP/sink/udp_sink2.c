@@ -21,7 +21,7 @@
 int validate_datagram(const char *buf, int length) {
     unsigned int reported_length = ((buf[0] << 8) | buf[1]) & 0xFFFF;
     int i = 2;
-    if (reported_length != length-2) {
+    if (reported_length != length) {
         fprintf(stderr, "Length mismatch: reported %d, actual %d\n", reported_length, length);
         return 0;
     }
@@ -55,7 +55,7 @@ int main(int argc, char *argv[]) {
    if ( (s=bind(sfd, (struct sockaddr *)&server, sizeof(server))) < 0)
       bailout("bind() ");
    printf("bind() successful\n");
-
+   printf("sfd: %d \n", sfd);
 
     /* Read datagrams and echo them back to sender. */
    printf("waiting for alphabet...\n");

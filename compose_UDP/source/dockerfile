@@ -2,4 +2,4 @@ FROM gcc:4.9
 COPY . /Client
 WORKDIR /Client
 RUN gcc -o udp_source2 udp_source2.c
-CMD  ["./udp_source2", "udp_sink2", "8888"]
+ENTRYPOINT  ["./udp_source2"]
