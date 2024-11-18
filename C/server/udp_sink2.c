@@ -1,6 +1,3 @@
-/* (c) Grzegorz Blinowski 2000-2023 [ PSI] */
-/* this example from: getaddrinfo man page */
-
 #include <err.h>
 #include <netdb.h>
 #include <stdio.h>
