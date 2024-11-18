@@ -48,4 +48,11 @@ Gdy wywoływaliśmy program lokalnie uzyskiwaliśmy zadowalające wyniki, nie mi
 
 ### 3. Serwer nie wysyłał odpowiedzi do klienta
 Napotkaliśmy problem przy próbie wysłania odpowiedzi do klienta zawierającej napis `"OK"`. Aby rozwiązać ten problem trzba było zamienić `"OK"` na `b"OK\x00"`, ponieważ serwer może wysyłać tylko dane w postaci bajtów.
+```python
+if not checkData(data):
+    print("Error in datagram")
+    break
+
+s.sendto(b"OK\x00", address)
+```
 
