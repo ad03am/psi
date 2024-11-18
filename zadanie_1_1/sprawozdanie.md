@@ -56,3 +56,47 @@ if not checkData(data):
 s.sendto(b"OK\x00", address)
 ```
 
+## Opis konfiguracji testowej
+
+Adresy IP serwerów są tworzone automatycznie, klienci odwołują się do nich poprzez hostname. Serwery działają na portach 8000.
+
+Przykład dla serwera pythonowego:
+```
+"ConfigOnly": false,
+        "Containers": {
+            "468f5935169703698ec82485d9cf8d4862df43aa85cda304b86ede721b43e5d5": {
+                "Name": "z34_p_server",
+                "EndpointID": "517be73eff0f5911659a69567bbe70cd0303627c0646f53e6b3a6d02713d39cf",
+                "MacAddress": "02:42:ac:15:22:02",
+                "IPv4Address": "172.21.34.2/24",
+                "IPv6Address": "fd00:1032:ac21:34::2/64"
+            }
+        },
+        "Options": {},
+        "Labels": {}
+```
+
+## Testy
+
+W celu przetestowania programu sprawdzone zostały wszystkie konfiguracje między sobą. 
+
+Błąd wyrzucany przez klienta pythona:
+```
+Traceback (most recent call last):
+  File "//./client.py", line 49, in <module>
+    main(sys.argv[1:])
+    ~~~~^^^^^^^^^^^^^^
+  File "//./client.py", line 37, in main
+    s.sendto(message, (host, port))
+    ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+OSError: [Errno 90] Message too long
+```
+
+Błąd wyrzucany przez klienta C:
+```
+Sending 65507 bytes datagram...
+Received 3 bytes from server
+Sending 65508 bytes datagram...
+send error!
+: Message too long
+```

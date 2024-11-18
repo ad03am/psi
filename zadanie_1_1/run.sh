@@ -27,9 +27,9 @@ docker rm -f z34_c_server z34_c_client 2>/dev/null || true
 
 sleep 3
 
-echo ==============================
-echo C server - C client combo
-echo ==============================
+echo ===================================
+echo Python server - Python client combo
+echo ===================================
 
 (
     cd ./Python/server
