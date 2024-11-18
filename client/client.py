@@ -1,7 +1,7 @@
 import socket
 import sys
 
-HOST = '127.0.0.1'
+HOST = '0.0.0.0'
 
 def generateDatagram(size: int) -> bytes:
     message = bytes([(size & 0xFF00) >> 8, size & 0x00FF])
@@ -13,27 +13,30 @@ def generateDatagram(size: int) -> bytes:
 
 
 def main(arguments: list[str]) -> None:
-    if len(arguments) < 1:
+    if len(arguments) < 2:
+        host = HOST
         port = 8000
-    elif len(arguments) == 1:
-        port = int(arguments[0])
+    elif len(arguments) == 2:
+        host = arguments[0]
+        port = int(arguments[1])
     else:
-        print("Usage: python client.py <port>")
+        print("Usage: python client.py <host> <port>")
         sys.exit(1)
 
-    print(f"Connecting to {HOST}:{port}")
-    size = 6
+    print(f"Connecting to {host}:{port}")
+    size = 65500
 
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
         while True:
             message = generateDatagram(size)
             print("Sending buffer size = ", size, ", data = ", message)
 
-            s.sendto(message, (HOST, port))
+            s.sendto(message, (host, port))
             data = s.recv(size)
             print('Received', repr(data))
+            print(f"Message Length: {len(data)}")
 
-            if data != message:
+            if data != b"OK\x00":
                 print("Error in datagram")
                 break
 
