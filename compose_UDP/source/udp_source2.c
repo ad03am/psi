@@ -35,7 +35,7 @@ int main(int argc, char *argv[])
     struct hostent *hp;
     char databuf[TEST_MAX_SIZE];
     char recvbuf[1024];
-    int dgram_size = 32768;
+    int dgram_size = 65500;
     socklen_t addr_len = sizeof(server);
 
 
