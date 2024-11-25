@@ -1,4 +1,5 @@
 import socket
+import sys
 
 HOST = '0.0.0.0'
 PORT = 8000
@@ -19,12 +20,25 @@ def checkData(data: bytes) -> bool:
     return True
 
 
-def main() -> None:
-    print(f"Server at {HOST}:{PORT}")
+def main(arguments: list[str]) -> None:
+    if len(arguments) < 1:
+        host = HOST
+        port = 8000
+    elif len(arguments) == 1:
+        host = arguments[0]
+        port = 8000
+    elif len(arguments) == 2:
+        host = arguments[0]
+        port = int(arguments[1])
+    else:
+        print("Usage: python client.py <host> <port>")
+        return 1
+    print(f"Server at {host}:{port}")
 
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
-        s.bind((HOST, PORT))
+        s.bind((host, port))
         seq = 0
+        print(f"socket: {s}")
 
         while True:
             data, address = s.recvfrom(BUFSIZE)
@@ -41,4 +55,4 @@ def main() -> None:
                 s.sendto(b"NACK" + bytes([seq]), address)
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv[1:])

@@ -15,7 +15,7 @@ def generateDatagram(size: int) -> bytes:
 
 
 def main(arguments: list[str]) -> None:
-    if len(arguments) < 2:
+    if len(arguments) < 1:
         host = HOST
         port = 8000
     elif len(arguments) == 1:
@@ -40,7 +40,6 @@ def main(arguments: list[str]) -> None:
 
             while True:
                 s.sendto(message, (host, port))
-
                 try:
                     data, _ = s.recvfrom(BUFSIZE)
 

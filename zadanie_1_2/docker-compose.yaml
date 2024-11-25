@@ -1,21 +1,21 @@
 version: "3.0"
 services:
   sink:
-    container_name: z34_sink
+    container_name: z34_server
     build: ./server
     tty: true
     cap_add:
     - NET_ADMIN
-    hostname: z34_sink
+    hostname: z34_server
     networks:
     - z34_network
   source:
-    container_name: z34_source
+    container_name: z34_client
     build: ./client
     tty: true
     cap_add:
     - NET_ADMIN
-    hostname: z34_source
+    hostname: z34_client
     networks:
     - z34_network
 networks:
