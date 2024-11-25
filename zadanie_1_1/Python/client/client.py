@@ -2,8 +2,6 @@ import socket
 import sys
 
 HOST = '0.0.0.0'
-BUFSIZE = 512
-TIMEOUT = 1
 
 def generateDatagram(size: int) -> bytes:
     message = bytes([(size & 0xFF00) >> 8, size & 0x00FF])
@@ -29,29 +27,23 @@ def main(arguments: list[str]) -> None:
         sys.exit(1)
 
     print(f"Connecting to {host}:{port}")
+    size = 65500
 
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
-        s.settimeout(TIMEOUT)
-        seq = 0
-
         while True:
-            message = generateDatagram(BUFSIZE)
-            print("Sending buffer sequence number = ", seq, ", data = ", message)
+            message = generateDatagram(size)
+            print("Sending buffer size = ", size, ", data = ", message)
 
-            while True:
-                s.sendto(message, (host, port))
+            s.sendto(message, (host, port))
+            data = s.recv(size)
+            print('Received', repr(data))
 
-                try:
-                    data, _ = s.recvfrom(BUFSIZE)
+            if data != b"OK\x00":
+                print("Error in datagram")
+                break
 
-                    if data[:3] == b"ACK" and data[3] == seq:
-                        print("Acknowledgment received")
-                        seq = 1 - seq
-                        break
-                    else:
-                        print("Incorrect acknowledgment, retransmitting...")
-                except socket.timeout:
-                    print("Timeout, retransmitting...")
+            size += 1
+
 
 if __name__ == "__main__":
     main(sys.argv[1:])
