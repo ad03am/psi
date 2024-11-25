@@ -49,7 +49,9 @@ s.sendto(message, (host, port))
 
 ## Problemy 
 
-
+### 1. Brak numeru sekwencyjnego w wysyłanym datagramie
+Na początku nie wysyłaliśmy numeru sekwencyjnego w datagramie, przez co serwer nie miał jak wykryć ominiętego datagramu.
+Rozwiązaniem było zawarcie numeru sekwencyjnego w pierwszym bajcie datagramu i porównywanie go z oczekiwanym numerem sekwencyjnym po stronie serwera.
 
 ## Opis konfiguracji testowej
 
