@@ -49,7 +49,9 @@ s.sendto(message, (host, port))
 
 ## Problemy 
 
+### 1. Nieprawidłowe działanie docker-compose
 
+Program nie działał gdy wywoływaliśmy go poleceniem `docker-compose`, więc wróciliśmy do wywoływania poleceniami `docker build` oraz `docker run`. Wtedy znaleziony został błąd przy przekazywaniu argumentów podczas uruchamiania klienta. Zmiany zostały naniesione do pliku dockerfile i wywołanie poprzez `docker-compose` zaczęło działać.
 
 ## Opis konfiguracji testowej
 
