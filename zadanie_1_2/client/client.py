@@ -3,7 +3,7 @@ import sys
 
 HOST = '0.0.0.0'
 BUFSIZE = 512
-TIMEOUT = 1
+TIMEOUT = 0.5
 
 def generateDatagram(size: int) -> bytes:
     message = bytes([(size & 0xFF00) >> 8, size & 0x00FF])
