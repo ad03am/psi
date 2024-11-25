@@ -1,0 +1,24 @@
+version: "3.0"
+services:
+  sink:
+    container_name: z34_sink
+    build: ./server
+    tty: true
+    cap_add:
+    - NET_ADMIN
+    hostname: z34_sink
+    networks:
+    - z34_network
+  source:
+    container_name: z34_source
+    build: ./client
+    tty: true
+    cap_add:
+    - NET_ADMIN
+    hostname: z34_source
+    networks:
+    - z34_network
+networks:
+  z34_network:
+    external: true
+    name: z34_network
