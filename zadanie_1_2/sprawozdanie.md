@@ -49,21 +49,7 @@ s.sendto(message, (host, port))
 
 ## Problemy 
 
-### 1. Błędna nazwa hosta
-Podczas wywoływania polecenia `docker run` jako argument odpowiadający za nazwę hosta była podawana nazwa serwera. Jednak przez brak flagi --hostname nie dało się połączyć z serwerem. Początkowo zostało to napraione poprzez podawanie adresu IP serwera zamiast jego nazwy, jednak ostatecznie udało się zauważyć brak flagi --hostname.
 
-### 2. Program działał poprawnie, ale tylko lokalnie
-Gdy wywoływaliśmy program lokalnie uzyskiwaliśmy zadowalające wyniki, nie mieliśmy żadnych problemów, jednak po przeniesieniu go na system `bigubu` program przestał działać. Zostało to naprawione poprzez ustawienie "na sztywno" hostów oraz portów a następnie szukanie miejsc gdzie pojawiają się problemy.
-
-### 3. Serwer nie wysyłał odpowiedzi do klienta
-Napotkaliśmy problem przy próbie wysłania odpowiedzi do klienta zawierającej napis `"OK"`. Aby rozwiązać ten problem trzba było zamienić `"OK"` na `b"OK\x00"`, ponieważ serwer może wysyłać tylko dane w postaci bajtów.
-```python
-if not checkData(data):
-    print("Error in datagram")
-    break
-
-s.sendto(b"OK\x00", address)
-```
 
 ## Opis konfiguracji testowej
 
