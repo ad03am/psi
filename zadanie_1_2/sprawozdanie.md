@@ -53,6 +53,10 @@ s.sendto(message, (host, port))
 
 Program nie działał gdy wywoływaliśmy go poleceniem `docker-compose`, więc wróciliśmy do wywoływania poleceniami `docker build` oraz `docker run`. Wtedy znaleziony został błąd przy przekazywaniu argumentów podczas uruchamiania klienta. Zmiany zostały naniesione do pliku dockerfile i wywołanie poprzez `docker-compose` zaczęło działać.
 
+### 2. Brak numeru sekwencyjnego w wysyłanym datagramie
+Na początku nie wysyłaliśmy numeru sekwencyjnego w datagramie, przez co serwer nie miał jak wykryć ominiętego datagramu.
+Rozwiązaniem było zawarcie numeru sekwencyjnego w pierwszym bajcie datagramu i porównywanie go z oczekiwanym numerem sekwencyjnym po stronie serwera.
+
 ## Opis konfiguracji testowej
 
 Adresy IP serwerów są tworzone automatycznie, klienci odwołują się do nich poprzez hostname. Serwery działają na portach 8000.
