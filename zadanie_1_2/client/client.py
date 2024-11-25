@@ -5,10 +5,10 @@ HOST = '0.0.0.0'
 BUFSIZE = 512
 TIMEOUT = 0.5
 
-def generateDatagram(size: int) -> bytes:
-    message = bytes([(size & 0xFF00) >> 8, size & 0x00FF])
+def generateDatagram(size: int, seq: int) -> bytes:
+    message = bytes([seq, (size & 0xFF00) >> 8, size & 0x00FF])
 
-    for i in range(size - 2):
+    for i in range(size - 3):
         message += bytes([ord('A') + (i % 26)])
 
     return message
@@ -35,7 +35,7 @@ def main(arguments: list[str]) -> None:
         seq = 0
 
         while True:
-            message = generateDatagram(BUFSIZE)
+            message = generateDatagram(BUFSIZE, seq)
             print("Sending buffer sequence number = ", seq, ", data = ", message)
 
             while True:
