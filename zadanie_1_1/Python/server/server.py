@@ -1,9 +1,8 @@
 import socket
-import sys
 
 HOST = '0.0.0.0'
 PORT = 8000
-BUFSIZE = 65536
+BUFSIZE = 512
 
 def checkData(data: bytes) -> bool:
     if len(data) < 2:
@@ -21,26 +20,25 @@ def checkData(data: bytes) -> bool:
 
 
 def main() -> None:
-
     print(f"Server at {HOST}:{PORT}")
 
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
         s.bind((HOST, PORT))
+        seq = 0
 
         while True:
-            data_address = s.recvfrom(BUFSIZE)
-            data = data_address[0]
-            address = data_address[1]
+            data, address = s.recvfrom(BUFSIZE)
             print(f"Message from Client: {data}")
             print(f"Client IP Address: {address}")
             print(f"Message Length: {len(data)}")
 
-            if not checkData(data):
+            if checkData(data):
+                print("Datagram received correctly")
+                s.sendto(b"ACK" + bytes([seq]), address)
+                seq = 1 - seq
+            else:
                 print("Error in datagram")
-                break
-
-            s.sendto(b"OK\x00", address)
-
+                s.sendto(b"NACK" + bytes([seq]), address)
 
 if __name__ == "__main__":
     main()
