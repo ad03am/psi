@@ -5,11 +5,8 @@ HOST = '0.0.0.0'
 PORT = 8000
 BUFSIZE = 512
 
-def checkData(data: bytes, seq: int) -> bool:
+def checkData(data: bytes) -> bool:
     if len(data) < 3:
-        return False
-
-    if data[0] != seq:
         return False
 
     size = (data[1] << 8) + data[2]
@@ -28,15 +25,16 @@ def main(arguments: list[str]) -> None:
 
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
         s.bind((HOST, PORT))
-        seq = 0
 
         while True:
             data, address = s.recvfrom(BUFSIZE)
             print(f"Message from Client: {data}")
             print(f"Client IP Address: {address}")
             print(f"Message Length: {len(data)}")
+            seq = data[0]
+            print("Seq:", seq)
 
-            if checkData(data, seq):
+            if checkData(data):
                 print("Datagram received correctly")
                 s.sendto(b"ACK" + bytes([seq]), address)
                 seq = 1 - seq
