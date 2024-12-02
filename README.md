@@ -8,3 +8,6 @@ W pliku run.sh zostało zaimplementowane przykładowe użycie.
 
 ## Zadanie 1.2
 W folderze zadanie_1_2 znajduje się rozwiązanie do zadania 1.2. Jest ono podzielone na klienta i serwer. Program uruchamiany jest poprzez polecenia `docker-compose build` a następnie `docker-compose up`. W celu zasymulowania prawdziwych warunków w sieci, na drugim terminalu należy uruchomić polecenie `docker exec z34_client tc qdisc add dev eth0 root netem delay 1000ms 500ms loss 50%`. 
+
+## Zadanie 2
+W folderze zadanie_2 znajduje się rozwiązanie do zadania 2. Jest ono podzielone na klienta i serwer. Program uruchamiany jest poprzez polecenia `docker-compose build` a następnie `docker-compose up`.
