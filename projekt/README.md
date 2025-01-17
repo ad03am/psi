@@ -1,10 +1,10 @@
 # PSI - projekt
 Adam Czupryński, Michał Sadlej, Szymon Makuch
 
-Szyfrowany protokół oparty na protokole TCP, tzw. mini TLS. Zaimplementujemy wariant W2 (MAC-then-Encrypt) - w języku Python.
+Szyfrowany protokół oparty na protokole TCP, tzw. mini TLS. Zaimplementowaliśmy wariant W2 (MAC-then-Encrypt) - w języku Python.
 
 ## Struktura
-Struktury wiadomości będą składać się z następujących pól:
+Struktury wiadomości składa się z następujących pól:
 
 ### ClientHello
 - typ wiadomości
@@ -33,7 +33,7 @@ Struktury wiadomości będą składać się z następujących pól:
 ## Wykorzystane algorytmy 
 
 ### Wymiana kluczy
-Zastosujemy algorytm wymiany kluczy Diffie-Hellman. Przebieg wymiany:
+Zastosowaliśmy algorytm wymiany kluczy Diffie-Hellman. Przebieg wymiany:
 
 1. Klient wybiera losową liczbę pierwszą `g` (generator) i liczbę pierwszą `p`
 2. Klient generuje prywatny klucz `a`
@@ -43,7 +43,7 @@ Zastosujemy algorytm wymiany kluczy Diffie-Hellman. Przebieg wymiany:
 6. Obie strony wspólnie obliczają klucz symetryczny: `K = (B^a) mod p = (A^b) mod p`
 
 ### Szyfrowanie
-Zastosujemy prosty algorytm OTP (One-Time Pad):
+Zastosowaliśmy prosty algorytm OTP (One-Time Pad):
 - Każda wiadomość będzie szyfrowana przy użyciu jednorazowego klucza
 - Klucz będzie generowany losowo dla każdej transmisji
 - Szyfrowanie polega na operacji XOR między wiadomością a kluczem
