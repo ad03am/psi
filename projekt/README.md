@@ -96,7 +96,7 @@ Mechanizm MAC-then-encrypt ma prostszą implementację i mniejszą złożoność
 
 Przedstawione logi pokazują komunikację sieciową między serwerem a trzema klientami.
 
-### Konfiguracja systemu:
+### Konfiguracja systemu
 * Serwer nasłuchuje na porcie 12345
 * Trzej klienci (client1, client2, client3) próbują się połączyć
 * Używane są adresy IP w sieci 172.23.0.x
@@ -115,7 +115,7 @@ server-1   | Server> list
 server-1   | No connected clients
 ```
 
-### Przebieg komunikacji:
+### Przebieg komunikacji
 * Najpierw wszyscy klienci uruchamiają się
 * Client1 łączy się jako pierwszy (z IP 172.23.0.4)
 * Następnie łączy się client2 (IP 172.23.0.3)
@@ -154,7 +154,7 @@ server-1   | 2. Client(('172.23.0.3', 49942))
 server-1   | 3. Client(('172.23.0.5', 36938))
 ```
 
-### Interakcje:
+### Interakcje
 * Klienci wysyłają testowe wiadomości
 * Client1 rozłącza się samodzielnie
 * Server odpina client2 komendą "disconnect"
@@ -188,7 +188,7 @@ client3-1  | client receive loop ended
 server-1 exited with code 0
 ```
 
-### Wireshark:
+### Wireshark
 Poniższy zrzut ekranu pokazuje:
 * Komunikację TCP między adresami 172.23.0.x
 * Pakiety ARP służące do rozpoznawania adresów
