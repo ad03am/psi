@@ -4,11 +4,17 @@ import logging
 import socket
 import select
 
+from message import Message, MessageType, EndSession
+from crypto import Crypto, EncryptedMessage
+from diffie_hellman import DiffieHellman
+
 
 class ClientSession:
-    def __init__(self, socket_: socket.socket, address: str):
-        self.socket = socket_
+    def __init__(self, client_socket: socket.socket, address: str):
+        self.socket = client_socket
         self.address = address
+        self.dh: DiffieHellman | None = None
+        self.crypto: Crypto | None = None
         self.buffer = b""
 
     def __str__(self):
@@ -57,25 +63,12 @@ class Server:
         for client_socket in list(self.clients.keys()):
             client_socket.close()
 
-    def main_loop(self):
-        while self.running:
-            read_sockets = [self.server_socket] + list(self.clients.keys())
-
-            try:
-                readable, _, _ = select.select(read_sockets, [], [], 1.0)
-            except select.error:
-                continue
-
-            for sock in readable:
-                if sock is self.server_socket:
-                    client_socket, address = self.server_socket.accept()
-                    if len(self.clients) >= self.max_clients:
-                        self.logger.warning(f"Rejecting connection from {address} - max clients reached")
-                        client_socket.close()
-                        continue
-
-                    self.logger.info(f"New connection from {address}")
-                    self.clients[client_socket] = ClientSession(client_socket, address)
+    def disconnect_client(self, client_socket: socket.socket):
+        if client_socket in self.clients:
+            client = self.clients[client_socket]
+            self.logger.info(f"Disconnecting {client}")
+            client_socket.close()
+            del self.clients[client_socket]
 
     def handle_commands(self):
         while self.running:
@@ -109,12 +102,74 @@ class Server:
                 self.running = False
                 break
 
-    def disconnect_client(self, client_socket: socket.socket):
-        if client_socket in self.clients:
-            client = self.clients[client_socket]
-            self.logger.info(f"Disconnecting {client}")
-            client_socket.close()
-            del self.clients[client_socket]
+    def main_loop(self):
+        while self.running:
+            read_sockets = [self.server_socket] + list(self.clients.keys())
+
+            try:
+                readable, _, _ = select.select(read_sockets, [], [], 1.0)
+            except select.error:
+                continue
+
+            for sock in readable:
+                if sock is self.server_socket:
+                    client_socket, address = self.server_socket.accept()
+                    if len(self.clients) >= self.max_clients:
+                        self.logger.warning(f"Rejecting connection from {address} - max clients reached")
+                        client_socket.close()
+                        continue
+
+                    self.logger.info(f"New connection from {address}")
+                    self.clients[client_socket] = ClientSession(client_socket, address)
+                else:
+                    try:
+                        data = sock.recv(4096)
+                        if not data:
+                            self.disconnect_client(sock)
+                            continue
+
+                        client = self.clients[sock]
+                        client.buffer += data
+
+                        while len(client.buffer) >= 5:
+                            try:
+                                msg = Message.from_bytes(client.buffer)
+                                client.buffer = client.buffer[5 + msg.length:]
+                                self.handle_message(sock, msg)
+                            except (ValueError, IndexError):
+                                break
+
+                    except ConnectionError:
+                        self.disconnect_client(sock)
+
+    def handle_message(self, client_socket: socket.socket, msg: Message):
+        client = self.clients[client_socket]
+
+        if msg.type == MessageType.CLIENT_HELLO:
+            ...
+
+        elif msg.type == MessageType.END_SESSION:
+            if client.crypto:
+                try:
+                    enc_msg = EncryptedMessage.from_bytes(msg.payload)
+                    decrypted = client.crypto.decrypt(enc_msg.ciphertext, enc_msg.iv)
+                    end_session = EndSession.from_bytes(decrypted)
+                    self.logger.info(f"Received EndSession from {client}: {end_session.reason}")
+                except ValueError as e:
+                    self.logger.error(f"Failed to decrypt EndSession from {client}: {e}")
+            self.disconnect_client(client_socket)
+
+        elif msg.type == MessageType.ENCRYPTED_MESSAGE:
+            if not client.crypto:
+                self.logger.error(f"Received encrypted message from {client} before key exchange")
+                return
+
+            try:
+                enc_msg = EncryptedMessage.from_bytes(msg.payload)
+                decrypted = client.crypto.decrypt(enc_msg.ciphertext, enc_msg.iv)
+                self.logger.info(f"Message from {client}: {decrypted.decode('utf-8')}")
+            except ValueError as e:
+                self.logger.error(f"Failed to decrypt message from {client}: {e}")
 
 
 def main():
