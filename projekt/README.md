@@ -48,6 +48,11 @@ Zastosowaliśmy prosty algorytm OTP (One-Time Pad):
 - Klucz będzie generowany losowo dla każdej transmisji
 - Szyfrowanie polega na operacji XOR między wiadomością a kluczem
 
+Proces generowania klucza dla OTP:
+- Initialization vector użyte jest jako pierszy blok
+- W pętli generowane są kolejne bloki przy pomocy HMAC-SHA256 poprzez wyliczenie HMAC z poprzedniego bloku używając klucza sesji
+- Po przekroczeniu zadanej długości pad jest przycinany do zadanej długości
+
 ### Scenariusz przykładowy
 
 #### 1. Inicjacja połączenia i wymiana kluczy
