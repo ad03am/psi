@@ -1,6 +1,7 @@
 import os
 import hmac
 import hashlib
+import struct
 
 class Crypto:
     def __init__(self, key: bytes):
@@ -45,3 +46,19 @@ class Crypto:
 
         return message
 
+class EncryptedMessage:
+    def __init__(self, iv: bytes, ciphertext: bytes):
+        self.iv = iv
+        self.ciphertext = ciphertext
+        
+    def to_bytes(self) -> bytes:
+        iv_len = len(self.iv)
+        cipher_len = len(self.ciphertext)
+        return struct.pack('!II', iv_len, cipher_len) + self.iv + self.ciphertext
+        
+    @staticmethod
+    def from_bytes(data: bytes) -> 'EncryptedMessage':
+        iv_len, cipher_len = struct.unpack('!II', data[:8])
+        iv = data[8:8+iv_len]
+        ciphertext = data[8+iv_len:8+iv_len+cipher_len]
+        return EncryptedMessage(iv, ciphertext)
