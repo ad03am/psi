@@ -11,3 +11,6 @@ W folderze zadanie_1_2 znajduje się rozwiązanie do zadania 1.2. Jest ono podzi
 
 ## Zadanie 2
 W folderze zadanie_2 znajduje się rozwiązanie do zadania 2. Jest ono podzielone na klienta i serwer. Program uruchamiany jest poprzez polecenia `docker-compose build` a następnie `docker-compose up`.
+
+## Projekt
+W folderze projekt znajduje się rozwiązanie do projektu.
