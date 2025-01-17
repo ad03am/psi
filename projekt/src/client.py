@@ -52,7 +52,8 @@ class Client:
         if not self.connected:
             self.logger.warning("Not connected")
             return
-        if self.connected and self.socket and self.crypto:
+        self.connected = False
+        if self.socket and self.crypto:
             try:
                 end_session = EndSession("Client initiated disconnect")
                 self.send_encrypted_message(MessageType.END_SESSION, end_session.to_bytes())
@@ -62,10 +63,10 @@ class Client:
         if self.socket:
             self.socket.close()
             self.socket = None
-        if self.receive_thread:
+        current_thread = threading.current_thread()
+        if self.receive_thread and current_thread != self.receive_thread:
             self.receive_thread.join(timeout=1.0)
-            self.receive_thread = None
-        self.connected = False
+        self.receive_thread = None
         self.crypto = None
         self.dh = None
         self.logger.info("Client disconnected")

@@ -94,8 +94,11 @@ class Server:
         if client_socket in self.clients:
             client = self.clients[client_socket]
             self.logger.info(f"Disconnecting {client}")
-            client_socket.close()
-            del self.clients[client_socket]
+            try:
+                del self.clients[client_socket]
+                client_socket.close()
+            except Exception as e:
+                self.logger.error(f"Error during client disconnect: {e}")
 
     def handle_commands(self):
         while self.running:
@@ -165,43 +168,64 @@ class Server:
 
     def main_loop(self):
         while self.running:
-            read_sockets = [self.server_socket] + list(self.clients.keys())
-
             try:
-                readable, _, _ = select.select(read_sockets, [], [], 1.0)
-            except select.error:
-                continue
+                read_sockets = [self.server_socket] + [
+                    sock for sock in self.clients.keys()
+                    if sock is not None and not sock._closed
+                ]
+                
+                try:
+                    readable, _, _ = select.select(read_sockets, [], [], 1.0)
+                except (select.error, ValueError) as e:
+                    self.logger.error(f"Select error: {e}")
+                    closed_sockets = [sock for sock in self.clients.keys() 
+                                    if sock._closed]
+                    for sock in closed_sockets:
+                        del self.clients[sock]
+                    continue
 
-            for sock in readable:
-                if sock is self.server_socket:
-                    client_socket, address = self.server_socket.accept()
-                    if len(self.clients) >= self.max_clients:
-                        self.logger.warning(f"Rejecting connection from {address} - max clients reached")
-                        client_socket.close()
-                        continue
+                for sock in readable:
+                    if sock is self.server_socket:
+                        try:
+                            client_socket, address = self.server_socket.accept()
+                            if len(self.clients) >= self.max_clients:
+                                self.logger.warning(f"Rejecting connection from {address} - max clients reached")
+                                client_socket.close()
+                                continue
 
-                    self.logger.info(f"New connection from {address}")
-                    self.clients[client_socket] = ClientSession(client_socket, address)
-                else:
-                    try:
-                        data = sock.recv(4096)
-                        if not data:
+                            self.logger.info(f"New connection from {address}")
+                            self.clients[client_socket] = ClientSession(client_socket, address)
+                        except Exception as e:
+                            self.logger.error(f"Error accepting new connection: {e}")
+                            continue
+                    else:
+                        if sock._closed:
                             self.disconnect_client(sock)
                             continue
+                            
+                        try:
+                            data = sock.recv(4096)
+                            if not data:
+                                self.disconnect_client(sock)
+                                continue
 
-                        client = self.clients[sock]
-                        client.buffer += data
+                            client = self.clients[sock]
+                            client.buffer += data
 
-                        while len(client.buffer) >= 5:
-                            try:
-                                msg = Message.from_bytes(client.buffer)
-                                client.buffer = client.buffer[5 + msg.length:]
-                                self.handle_message(sock, msg)
-                            except (ValueError, IndexError):
-                                break
+                            while len(client.buffer) >= 5:
+                                try:
+                                    msg = Message.from_bytes(client.buffer)
+                                    client.buffer = client.buffer[5 + msg.length:]
+                                    self.handle_message(sock, msg)
+                                except (ValueError, IndexError):
+                                    break
 
-                    except ConnectionError:
-                        self.disconnect_client(sock)
+                        except (ConnectionError, OSError) as e:
+                            self.logger.error(f"Error receiving data: {e}")
+                            self.disconnect_client(sock)
+                            
+            except Exception as e:
+                self.logger.error(f"Error in main loop: {e}")
 
 
 def main():
