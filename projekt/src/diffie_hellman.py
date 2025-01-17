@@ -3,10 +3,11 @@ import random
 class diffie_hellman:
     def __init__(self):
         self.primes = [5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47]
+        self.generators = [2, 3]
         
     def generate_parameters(self):
         self.p = random.choice(self.primes)
-        self.g = random.choice([2, 3])
+        self.g = random.choice(self.generators)
         self.private_key = random.randint(2, self.p - 1)
         self.public_key = pow(self.g, self.private_key, self.p)
         return self.g, self.p, self.public_key
