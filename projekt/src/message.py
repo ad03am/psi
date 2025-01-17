@@ -53,3 +53,15 @@ class ServerHello:
     def from_bytes(data: bytes) -> 'ServerHello':
         (B,) = struct.unpack('!Q', data)
         return ServerHello(B)
+
+
+class EndSession:
+    def __init__(self, reason: str):
+        self.reason = reason
+
+    def to_bytes(self) -> bytes:
+        return self.reason.encode('utf-8')
+
+    @staticmethod
+    def from_bytes(data: bytes) -> 'EndSession':
+        return EndSession(data.decode('utf-8'))
