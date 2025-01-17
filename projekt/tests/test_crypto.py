@@ -4,7 +4,7 @@ import os
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'src'))
 
-from crypto import Crypto
+from crypto import Crypto, EncryptedMessage
 
 class TestCrypto(unittest.TestCase):
     def setUp(self):
@@ -33,6 +33,17 @@ class TestCrypto(unittest.TestCase):
         
         with self.assertRaises(ValueError):
             self.crypto.decrypt(bytes(tampered), iv)
+
+    def test_encrypted_message_serialization(self):
+        iv = os.urandom(16)
+        ciphertext = os.urandom(64)
+        
+        msg = EncryptedMessage(iv, ciphertext)
+        serialized = msg.to_bytes()
+        deserialized = EncryptedMessage.from_bytes(serialized)
+        
+        self.assertEqual(deserialized.iv, iv)
+        self.assertEqual(deserialized.ciphertext, ciphertext)
 
 
 if __name__ == '__main__':
