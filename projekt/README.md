@@ -25,7 +25,7 @@ Struktury wiadomości składa się z następujących pól:
 - zaszyfrowana wiadomość
 - MAC
 
-### EndSession
+### Szyfrowane EndSession
 - typ wiadomości
 - długość wiadomości
 - powód zakończenia sesji
