@@ -25,3 +25,19 @@ class Message:
         payload = data[5:5+length]
 
         return Message(MessageType(msg_type), payload)
+
+
+class ClientHello:
+    def __init__(self, g: int, p: int, A: int):
+        self.g = g
+        self.p = p
+        self.A = A
+
+    def to_bytes(self) -> bytes:
+        return struct.pack('!QQQ', self.g, self.p, self.A)
+
+    @staticmethod
+    def from_bytes(data: bytes) -> 'ClientHello':
+        g, p, A = struct.unpack('!QQQ', data)
+        return ClientHello(g, p, A)
+
