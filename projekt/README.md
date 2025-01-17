@@ -94,8 +94,12 @@ Mechanizm MAC-then-encrypt ma prostszą implementację i mniejszą złożoność
 
 ## Działanie programu
 
-Zrzut z działania systemu:
+Przedstawione logi pokazują komunikację sieciową między serwerem a trzema klientami.
 
+### Konfiguracja systemu:
+* Serwer nasłuchuje na porcie 12345
+* Trzej klienci (client1, client2, client3) próbują się połączyć
+* Używane są adresy IP w sieci 172.23.0.x
 ```bash
 server-1   | [2025-01-17 19:53:16,312] INFO: Server started on 0.0.0.0:12345
 client2-1  | Client server:12345 started
@@ -109,6 +113,15 @@ server-1   |   help - Show this help
 server-1   |   exit - Stop the server
 server-1   | Server> list
 server-1   | No connected clients
+```
+
+### Przebieg komunikacji:
+* Najpierw wszyscy klienci uruchamiają się
+* Client1 łączy się jako pierwszy (z IP 172.23.0.4)
+* Następnie łączy się client2 (IP 172.23.0.3)
+* Na końcu łączy się client3 (IP 172.23.0.5)
+* Każde połączenie inicjuje wymianę kluczy ("Key exchange completed")
+```bash
 client1-1  | Client> help
 client1-1  | Available commands:
 client1-1  |   connect - Connect to server
@@ -139,6 +152,14 @@ server-1   | list
 server-1   | 1. Client(('172.23.0.4', 37612))
 server-1   | 2. Client(('172.23.0.3', 49942))
 server-1   | 3. Client(('172.23.0.5', 36938))
+```
+
+### Interakcje:
+* Klienci wysyłają testowe wiadomości
+* Client1 rozłącza się samodzielnie
+* Server odpina client2 komendą "disconnect"
+* Server kończy działanie, co powoduje rozłączenie client3
+```bash
 client2-1  | Client> send client two
 server-1   | Server> [2025-01-17 19:54:55,962] INFO: Message from Client(('172.23.0.3', 49942)): client two
 client3-1  | send client three
@@ -167,5 +188,12 @@ client3-1  | client receive loop ended
 server-1 exited with code 0
 ```
 
+### Wireshark:
+Poniższy zrzut ekranu pokazuje:
+* Komunikację TCP między adresami 172.23.0.x
+* Pakiety ARP służące do rozpoznawania adresów
+* Wymianę pakietów SYN podczas nawiązywania połączeń
+* Pakiety PSH+ACK przy przesyłaniu danych
+* Różne długości pakietów wskazujące na szyfrowaną komunikację
 
 ![Screen z Wiresharka](wireshark.png)
