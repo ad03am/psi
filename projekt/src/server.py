@@ -4,9 +4,9 @@ import logging
 import socket
 import select
 
-from message import Message, MessageType, EndSession
+from message import Message, MessageType, ClientHello, ServerHello, EndSession
+from diffie_hellman import DiffieHellman, generate_session_key
 from crypto import Crypto, EncryptedMessage
-from diffie_hellman import DiffieHellman
 
 
 class ClientSession:
@@ -63,12 +63,37 @@ class Server:
         for client_socket in list(self.clients.keys()):
             client_socket.close()
 
+    def handle_client_hello(self, client_socket: socket.socket, msg: Message):
+        client = self.clients[client_socket]
+        client_hello = ClientHello.from_bytes(msg.payload)
+
+        client.dh = DiffieHellman()
+        B = client.dh.generate_from_parameters(client_hello.p, client_hello.g)
+
+        shared_secret = client.dh.compute_shared_secret(client_hello.A)
+        session_key = generate_session_key(shared_secret)
+        client.crypto = Crypto(session_key)
+
+        server_hello = ServerHello(B)
+        response = Message(MessageType.SERVER_HELLO, server_hello.to_bytes())
+        client_socket.send(response.to_bytes())
+
+        self.logger.info(f"Key exchange completed with {client}")
+
     def disconnect_client(self, client_socket: socket.socket):
         if client_socket in self.clients:
             client = self.clients[client_socket]
-            self.logger.info(f"Disconnecting {client}")
+            if client.crypto:
+                try:
+                    end_session = EndSession("Server initiated disconnect")
+                    msg = Message(MessageType.END_SESSION, end_session.to_bytes())
+                    client_socket.send(msg.to_bytes())
+                except (OSError, ValueError):
+                    pass
+
             client_socket.close()
             del self.clients[client_socket]
+            self.logger.info(f"Disconnected {client}")
 
     def handle_commands(self):
         while self.running:
