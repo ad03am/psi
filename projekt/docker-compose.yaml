@@ -1,0 +1,22 @@
+version: '3'
+
+services:
+  server:
+    build: .
+    command: python -u src/server.py
+    networks:
+      - mini-tls-network
+    ports:
+      - "12345:12345"
+
+  client:
+    build: .
+    command: python -u src/client.py
+    networks:
+      - mini-tls-network
+    depends_on:
+      - server
+
+networks:
+  mini-tls-network:
+    driver: bridge
