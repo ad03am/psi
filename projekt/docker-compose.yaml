@@ -1,13 +1,13 @@
-version: '3'
-
 services:
   server:
     build: .
-    command: python -u src/server.py --host 0.0.0.0 --port 12345 --max-clients 10
+    command: python -u src/server.py --host 0.0.0.0 --port 12345 --max-clients 3
     networks:
       - mini-tls-network
     ports:
       - "12345:12345"
+    stdin_open: true
+    tty: true
 
   client1:
     build: .

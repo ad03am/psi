@@ -49,6 +49,9 @@ class Client:
             return False
 
     def disconnect(self):
+        if not self.connected:
+            self.logger.warning("Not connected")
+            return
         if self.connected and self.socket and self.crypto:
             try:
                 end_session = EndSession("Client initiated disconnect")
@@ -65,6 +68,20 @@ class Client:
         self.connected = False
         self.crypto = None
         self.dh = None
+        self.logger.info("Client disconnected")
+
+    def send(self, cmd: list):
+        if len(cmd) < 2:
+            print("Usage: send <message>")
+            return
+        if not self.connected:
+            print("Not connected")
+            return
+        if not self.crypto:
+            print("Key exchange not completed")
+            return
+        message = " ".join(cmd[1:])
+        self.send_encrypted_message(MessageType.ENCRYPTED_MESSAGE, message.encode('utf-8'))
 
     def send_encrypted_message(self, msg_type: MessageType, content: bytes):
         if not self.crypto:
@@ -76,7 +93,7 @@ class Client:
         self.socket.send(msg.to_bytes())
 
     def receive_loop(self):
-        while self.connected and self.socket:
+        while self.socket:
             try:
                 data = self.socket.recv(4096)
                 if not data:
@@ -99,6 +116,7 @@ class Client:
                     self.logger.error(f"Connection error: {e}")
                     self.disconnect()
                 break
+        print("client receive loop ended")
 
     def handle_message(self, msg: Message):
         if msg.type == MessageType.SERVER_HELLO:
@@ -139,6 +157,7 @@ class Client:
             self.logger.error(f"Failed to decrypt message: {e}")
 
     def start(self):
+        print(f"Client {self.host}:{self.port} started")
         try:
             while True:
                 cmd = input("Client> ").strip().split()
@@ -152,15 +171,7 @@ class Client:
                 elif cmd[0] == "disconnect":
                     self.disconnect()
                 elif cmd[0] == "send":
-                    if len(cmd) < 2:
-                        print("Usage: send <message>")
-                        continue
-                    if not self.connected or not self.crypto:
-                        print("Not connected or key exchange not completed")
-                        continue
-                    message = " ".join(cmd[1:])
-                    self.send_encrypted_message(MessageType.ENCRYPTED_MESSAGE, 
-                                             message.encode('utf-8'))
+                    self.send(cmd)
                 elif cmd[0] == "help":
                     self.print_help()
                 else:

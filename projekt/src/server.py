@@ -143,7 +143,6 @@ class Server:
         elif msg.type == MessageType.END_SESSION:
             if client.crypto:
                 try:
-                    # Decrypt EndSession message
                     enc_msg = EncryptedMessage.from_bytes(msg.payload)
                     decrypted = client.crypto.decrypt(enc_msg.ciphertext, enc_msg.iv)
                     end_session = EndSession.from_bytes(decrypted)
