@@ -1,6 +1,6 @@
 import random
 
-class diffie_hellman:
+class DiffieHellman:
     def __init__(self):
         self.primes = [5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47]
         self.generators = [2, 3]
