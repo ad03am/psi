@@ -29,8 +29,24 @@ class Client:
             return False
 
         try:
+            try:
+                socket.gethostbyname(self.host)
+            except socket.gaierror as e:
+                self.logger.error(f"Cannot resolve hostname '{self.host}': {e}")
+                return False
+
             self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            self.socket.connect((self.host, self.port))
+            self.socket.settimeout(1)
+
+            try:
+                self.socket.connect((self.host, self.port))
+            except Exception as e:
+                self.logger.error(f"Connection failed: {e}")
+                self.socket.close()
+                self.socket = None
+                return False
+            
+            self.socket.settimeout(None)
             self.dh = DiffieHellman()
             g, p, A = self.dh.generate_parameters()
             client_hello = ClientHello(g, p, A)
@@ -44,7 +60,7 @@ class Client:
             self.connected = True
             self.logger.info(f"Connected to {self.host}:{self.port}")
             return True
-        except ConnectionError as e:
+        except Exception as e:
             self.logger.error(f"Connection failed: {e}")
             return False
 
