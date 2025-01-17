@@ -61,7 +61,7 @@ class Server:
         if self.server_socket:
             self.server_socket.close()
         for client_socket in list(self.clients.keys()):
-            client_socket.close()
+            self.disconnect_client(client_socket)
 
     def handle_client_hello(self, client_socket: socket.socket, msg: Message):
         client = self.clients[client_socket]
@@ -80,20 +80,22 @@ class Server:
 
         self.logger.info(f"Key exchange completed with {client}")
 
+    def send_encrypted_message(self, client_socket: socket.socket, content: bytes):
+        client = self.clients[client_socket]
+        if not client.crypto:
+            raise ValueError("Cannot send encrypted message before key exchange")
+
+        encrypted, iv = client.crypto.encrypt(content)
+        enc_msg = EncryptedMessage(iv, encrypted)
+        msg = Message(MessageType.ENCRYPTED_MESSAGE, enc_msg.to_bytes())
+        client_socket.send(msg.to_bytes())
+
     def disconnect_client(self, client_socket: socket.socket):
         if client_socket in self.clients:
             client = self.clients[client_socket]
-            if client.crypto:
-                try:
-                    end_session = EndSession("Server initiated disconnect")
-                    msg = Message(MessageType.END_SESSION, end_session.to_bytes())
-                    client_socket.send(msg.to_bytes())
-                except (OSError, ValueError):
-                    pass
-
+            self.logger.info(f"Disconnecting {client}")
             client_socket.close()
             del self.clients[client_socket]
-            self.logger.info(f"Disconnected {client}")
 
     def handle_commands(self):
         while self.running:
@@ -112,6 +114,11 @@ class Server:
                 try:
                     idx = int(cmd[1]) - 1
                     client_socket = list(self.clients.keys())[idx]
+
+                    if self.clients[client_socket].crypto:
+                        end_session = EndSession("Server initiated disconnect")
+                        self.send_encrypted_message(client_socket, end_session.to_bytes())
+
                     self.disconnect_client(client_socket)
                 except (IndexError, ValueError):
                     print("Usage: disconnect <client_number>")
@@ -126,6 +133,36 @@ class Server:
             elif cmd[0] == "exit":
                 self.running = False
                 break
+
+    def handle_message(self, client_socket: socket.socket, msg: Message):
+        client = self.clients[client_socket]
+
+        if msg.type == MessageType.CLIENT_HELLO:
+            self.handle_client_hello(client_socket, msg)
+
+        elif msg.type == MessageType.END_SESSION:
+            if client.crypto:
+                try:
+                    # Decrypt EndSession message
+                    enc_msg = EncryptedMessage.from_bytes(msg.payload)
+                    decrypted = client.crypto.decrypt(enc_msg.ciphertext, enc_msg.iv)
+                    end_session = EndSession.from_bytes(decrypted)
+                    self.logger.info(f"Received EndSession from {client}: {end_session.reason}")
+                except ValueError as e:
+                    self.logger.error(f"Failed to decrypt EndSession from {client}: {e}")
+            self.disconnect_client(client_socket)
+
+        elif msg.type == MessageType.ENCRYPTED_MESSAGE:
+            if not client.crypto:
+                self.logger.error(f"Received encrypted message from {client} before key exchange")
+                return
+
+            try:
+                enc_msg = EncryptedMessage.from_bytes(msg.payload)
+                decrypted = client.crypto.decrypt(enc_msg.ciphertext, enc_msg.iv)
+                self.logger.info(f"Message from {client}: {decrypted.decode('utf-8')}")
+            except ValueError as e:
+                self.logger.error(f"Failed to decrypt message from {client}: {e}")
 
     def main_loop(self):
         while self.running:
@@ -166,35 +203,6 @@ class Server:
 
                     except ConnectionError:
                         self.disconnect_client(sock)
-
-    def handle_message(self, client_socket: socket.socket, msg: Message):
-        client = self.clients[client_socket]
-
-        if msg.type == MessageType.CLIENT_HELLO:
-            ...
-
-        elif msg.type == MessageType.END_SESSION:
-            if client.crypto:
-                try:
-                    enc_msg = EncryptedMessage.from_bytes(msg.payload)
-                    decrypted = client.crypto.decrypt(enc_msg.ciphertext, enc_msg.iv)
-                    end_session = EndSession.from_bytes(decrypted)
-                    self.logger.info(f"Received EndSession from {client}: {end_session.reason}")
-                except ValueError as e:
-                    self.logger.error(f"Failed to decrypt EndSession from {client}: {e}")
-            self.disconnect_client(client_socket)
-
-        elif msg.type == MessageType.ENCRYPTED_MESSAGE:
-            if not client.crypto:
-                self.logger.error(f"Received encrypted message from {client} before key exchange")
-                return
-
-            try:
-                enc_msg = EncryptedMessage.from_bytes(msg.payload)
-                decrypted = client.crypto.decrypt(enc_msg.ciphertext, enc_msg.iv)
-                self.logger.info(f"Message from {client}: {decrypted.decode('utf-8')}")
-            except ValueError as e:
-                self.logger.error(f"Failed to decrypt message from {client}: {e}")
 
 
 def main():
