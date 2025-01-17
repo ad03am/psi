@@ -13,4 +13,4 @@ W folderze zadanie_1_2 znajduje się rozwiązanie do zadania 1.2. Jest ono podzi
 W folderze zadanie_2 znajduje się rozwiązanie do zadania 2. Jest ono podzielone na klienta i serwer. Program uruchamiany jest poprzez polecenia `docker-compose build` a następnie `docker-compose up`.
 
 ## Projekt
-W folderze projekt znajduje się rozwiązanie do projektu.
+W folderze projekt znajduje się rozwiązanie do projektu. W celu uruchomienia proejktu należy wywołać polecenie `docker compose up --build`. Następnie w osobnym terminalu należy wywołać polecenie `docker attach [nazwa_kontenera]` aby uzyskać dostęp do klienta. Po uruchomieniu klienta można wywołać polecenie `help` aby zobaczyć dostępne opcje.

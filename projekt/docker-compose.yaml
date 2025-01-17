@@ -1,44 +1,58 @@
 services:
   server:
+    container_name: z34_server
     build: .
     command: python -u src/server.py --host 0.0.0.0 --port 12345 --max-clients 3
-    networks:
-      - mini-tls-network
     ports:
       - "12345:12345"
     stdin_open: true
     tty: true
+    cap_add:
+    - NET_ADMIN
+    networks:
+    - z34_network
 
   client1:
+    container_name: z34_client1
     build: .
     command: python -u src/client.py --host server --port 12345
-    networks:
-      - mini-tls-network
     depends_on:
       - server
     stdin_open: true
     tty: true
+    cap_add:
+    - NET_ADMIN
+    networks:
+    - z34_network
 
   client2:
+    container_name: z34_client2
     build: .
     command: python -u src/client.py --host server --port 12345
-    networks:
-      - mini-tls-network
     depends_on:
       - server
     stdin_open: true
     tty: true
+    cap_add:
+    - NET_ADMIN
+    networks:
+    - z34_network
 
   client3:
+    container_name: z34_client3
     build: .
     command: python -u src/client.py --host server --port 12345
-    networks:
-      - mini-tls-network
     depends_on:
       - server
     stdin_open: true
     tty: true
+    cap_add:
+    - NET_ADMIN
+    networks:
+    - z34_network
 
 networks:
-  mini-tls-network:
-    driver: bridge
+  z34_network:
+    external: true
+    name: z34_network
+
