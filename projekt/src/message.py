@@ -41,3 +41,15 @@ class ClientHello:
         g, p, A = struct.unpack('!QQQ', data)
         return ClientHello(g, p, A)
 
+
+class ServerHello:
+    def __init__(self, B: int):
+        self.B = B
+
+    def to_bytes(self) -> bytes:
+        return struct.pack('!Q', self.B)
+
+    @staticmethod
+    def from_bytes(data: bytes) -> 'ServerHello':
+        (B,) = struct.unpack('!Q', data)
+        return ServerHello(B)
