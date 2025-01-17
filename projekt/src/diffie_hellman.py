@@ -21,3 +21,7 @@ class diffie_hellman:
     
     def compute_shared_secret(self, other_public_key: int) -> int:
         return pow(other_public_key, self.private_key, self.p)
+
+def generate_session_key(shared_secret: int) -> bytes:
+    key = shared_secret.to_bytes(32, byteorder='big')
+    return key

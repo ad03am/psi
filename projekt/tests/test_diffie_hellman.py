@@ -4,7 +4,7 @@ import os
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'src'))
 
-from diffie_hellman import diffie_hellman
+from diffie_hellman import diffie_hellman, generate_session_key
 
 class test_diffie_hellman(unittest.TestCase):
     def test_parameter_generation(self):
@@ -27,6 +27,13 @@ class test_diffie_hellman(unittest.TestCase):
         bob_secret = bob.compute_shared_secret(A)
         
         self.assertEqual(alice_secret, bob_secret)
+    
+    def test_session_key_generation(self):
+        shared_secret = 12345
+        key = generate_session_key(shared_secret)
+        
+        self.assertEqual(len(key), 32)
+        self.assertEqual(int.from_bytes(key, byteorder='big'), shared_secret)
 
 if __name__ == '__main__':
     unittest.main()
