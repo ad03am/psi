@@ -2,7 +2,7 @@ import socket
 import logging
 import argparse
 import threading
-from message import Message
+from message import Message, MessageType
 
 class Client:
     def __init__(self, host: str, port: int):
@@ -74,7 +74,23 @@ class Client:
                 break
                 
     def handle_message(self, msg: Message):
-        print("message received")
+        if msg.type == MessageType.SERVER_HELLO:
+            self.handle_server_hello(msg)
+        elif msg.type == MessageType.END_SESSION:
+            self.handle_end_session(msg)
+        elif msg.type == MessageType.ENCRYPTED_MESSAGE:
+            self.handle_encrypted_message(msg)
+            
+    def handle_server_hello(self, msg: Message):
+        print("server hello:")
+        print(msg)
+        
+    def handle_end_session(self, msg: Message):
+        self.logger.info("Server ended session")
+        self.disconnect()
+        
+    def handle_encrypted_message(self, msg: Message):
+        print("encrypted message: ")
         print(msg)
 
     def start(self):
